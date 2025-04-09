@@ -45,7 +45,7 @@ const TableHeader = () => {
     <div className="w-full h-full px-4 py-6 dark:bg-dark-custom">
       <div className="flex items-center justify-between w-full">
         <div className="flex gap-3 items-center">
-          <span>Show</span>
+          <span className="hidden sm:block">Show</span>
           <div className="flex items-center gap-3">
               <Select
                 value={
@@ -56,7 +56,7 @@ const TableHeader = () => {
                 onValueChange={handleSelectChange}
               >
                 <SelectTrigger className="w-fit bg-[#E0E0E0] dark:bg-[#141432] dark:border-none">
-                  <SelectValue placeholder={selectedLabel} />
+                  <SelectValue placeholder={selectedLabel} className="text-sm sm:text-xs" />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
@@ -68,7 +68,7 @@ const TableHeader = () => {
                 </SelectGroup>
               </SelectContent>
             </Select>
-            <span>entries</span>
+            <span className="hidden sm:block">entries</span>
           </div>
           <div className="relative">
             <input

@@ -17,42 +17,45 @@ import { formatDate } from "@/utils/formatDate";
 import { getStatusStyle } from "@/utils/getStatusStyle";
 import Pagination from "./Pagination";
 import { toast } from "sonner";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 
 export default function OrderTable() {
   const {
-    products,
+    filteredProductsForSearch,
     selectedAmount,
-    searchQuery,
     currentPage,
     setCurrentPage,
     totalPages,
-    removeProduct
+    removeProduct,
   } = useProduct();
 
-  const filteredProducts = products.filter((item) =>
-    item["Product Name"].toLowerCase().includes(searchQuery.toLowerCase())
+  const displayedProducts = useMemo(() => {
+    return filteredProductsForSearch.slice(
+      (currentPage - 1) * selectedAmount,
+      currentPage * selectedAmount
+    );
+  }, [filteredProductsForSearch, currentPage, selectedAmount]);
+
+  const handleDelete = useCallback(
+    (productId: number) => {
+      removeProduct(productId);
+      toast.success("Product deleted successfully");
+    },
+    [removeProduct]
   );
 
-  const displayedProducts = filteredProducts.slice(
-    (currentPage - 1) * selectedAmount,
-    currentPage * selectedAmount
+  const handlePageChange = useCallback(
+    (page: number) => {
+      if (page < 1 || page > totalPages) return;
+      setCurrentPage(page);
+    },
+    [totalPages]
   );
-
-  const handleDelete = useCallback((productId: number) => {
-    removeProduct(productId);
-    toast.success("Product deleted successfully");
-  }, [removeProduct]);
-  
-  const handlePageChange = useCallback((page: number) => {
-    if (page < 1 || page > totalPages) return;
-    setCurrentPage(page);
-  }, [totalPages]);
 
   return (
-    <div className="overflow-x-auto dark:bg-dark-custom">
+    <div className="overflow-x-auto w-full dark:bg-dark-custom">
       <Table className="border-separate border-spacing-0">
-        <TableHeader>
+        <TableHeader className="hidden md:table-header-group">
           <TableRow className="bg-white dark:bg-dark-custom">
             <TableHead className="font-bold text-center">Tracking ID</TableHead>
             <TableHead className="font-bold">Product</TableHead>
@@ -69,40 +72,86 @@ export default function OrderTable() {
             const isEven = index % 2 === 0;
             return (
               <TableRow
-                key={index}
+                key={item["Tracking ID"]}
                 className={clsx(
-                  "transition-colors",
+                  "transition-colors md:table-row flex flex-col md:flex-row",
                   isEven
                     ? "bg-[#F7F6FE] dark:bg-[#26264F]"
                     : "bg-white dark:bg-dark-custom"
                 )}
               >
-                <TableCell className="text-center">
+                <TableCell className="text-center md:table-cell">
+                  <span className="md:hidden font-semibold text-purple-600 dark:text-purple-400 mr-3">
+                    Tracking ID:
+                  </span>
                   #{item["Tracking ID"]}
                 </TableCell>
-                <TableCell className="flex items-center gap-2">
-                  <Image
-                    src={item["Product Image"]}
-                    alt={item["Product Name"]}
-                    width={32}
-                    height={32}
-                    className="size-8 rounded-full object-cover"
-                  />
-                  {item["Product Name"]}
-                </TableCell>
-                <TableCell>{item.Customer}</TableCell>
-                <TableCell>{formatDate(item.Date)}</TableCell>
-                <TableCell>${item.Amount.toFixed(2)}</TableCell>
-                <TableCell>{item["Payment Mode"]}</TableCell>
-                <TableCell>
-                  <span
-                    className={clsx(
-                      "px-3 py-1 rounded-full text-sm font-medium",
-                      getStatusStyle(item.Status)
-                    )}
+                <TableCell className="flex items-center gap-2 md:table-cell">
+                  <div
+                    className="flex flex-col md:flex-row items-center justify-center md:justify-normal 
+                  gap-2 w-full"
                   >
-                    {item.Status}
-                  </span>
+                    <Image
+                      src={item["Product Image"]}
+                      alt={item["Product Name"]}
+                      width={32}
+                      height={32}
+                      className="size-8 rounded-full object-cover"
+                    />
+                    <span>
+                      <span className="md:hidden font-semibold text-purple-600 dark:text-purple-400">
+                        Product:{" "}
+                      </span>
+                      {item["Product Name"]}
+                    </span>
+                  </div>
+                </TableCell>
+                <TableCell className="md:table-cell">
+                  <div className="flex items-center gap-2 justify-center md:justify-normal">
+                    <span className="md:hidden font-semibold text-purple-600 dark:text-purple-400">
+                      Customer:{" "}
+                    </span>
+                    <span>{item.Customer}</span>
+                  </div>
+                </TableCell>
+                <TableCell className="md:table-cell">
+                  <div className="flex items-center gap-2 justify-center md:justify-normal">
+                    <span className="md:hidden font-semibold text-purple-600 dark:text-purple-400">
+                      Date:{" "}
+                    </span>
+                    <span>{formatDate(item.Date)}</span>
+                  </div>
+                </TableCell>
+                <TableCell className="md:table-cell">
+                  <div className="flex items-center justify-center md:justify-normal gap-2">
+                    <span className="md:hidden font-semibold text-purple-600 dark:text-purple-400">
+                      Amount:{" "}
+                    </span>
+                    <span>${item.Amount.toFixed(2)}</span>
+                  </div>
+                </TableCell>
+                <TableCell className="md:table-cell">
+                  <div className="flex items-center justify-center md:justify-normal gap-2">
+                    <span className="md:hidden font-semibold text-purple-600 dark:text-purple-400">
+                      Payment:{" "}
+                    </span>
+                    <span>{item["Payment Mode"]}</span>
+                  </div>
+                </TableCell>
+                <TableCell className="md:table-cell">
+                  <div className="flex items-center justify-center md:justify-normal gap-3">
+                    <span className="md:hidden font-semibold text-purple-600 dark:text-purple-400">
+                      Status:{" "}
+                    </span>
+                    <span
+                      className={clsx(
+                        "px-3 py-1 rounded-full text-sm font-medium",
+                        getStatusStyle(item.Status)
+                      )}
+                    >
+                      {item.Status}
+                    </span>
+                  </div>
                 </TableCell>
                 <TableCell className="flex gap-2 justify-center">
                   <Button size="icon" variant="ghost">
