@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SwitchThemeMode } from "./SwitchThemeMode";
-import { Search } from "lucide-react";
+import { Loader2, Search } from "lucide-react";
 import { useProduct } from "@/context/ProductContext";
 import { ChangeEvent } from "react";
 
@@ -22,31 +22,48 @@ const TableHeader = () => {
     setSearchQuery,
     setCurrentPage,
     currentPage,
+    loading,
+    setLoading,
   } = useProduct();
 
   const handleSelectChange = (value: string) => {
-    const newAmount = value === "show-all" ? filteredProductsForSearch.length : Number(value);
+    setLoading(true);
+    const newAmount =
+      value === "show-all" ? filteredProductsForSearch.length : Number(value);
     setSelectedAmount(newAmount);
-  
+
     const maxPages = Math.ceil(filteredProductsForSearch.length / newAmount);
-    
+
     if (currentPage > maxPages) {
       setCurrentPage(maxPages);
     }
+    setTimeout(() => {
+      setLoading(false);
+    }, 300);
   };
 
   const selectedLabel =
-    selectedAmount === filteredProductsForSearch.length ? "Show All" : selectedAmount.toString();
+    selectedAmount === filteredProductsForSearch.length
+      ? "Show All"
+      : selectedAmount.toString();
 
-    const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
-      setSearchQuery(e.target.value);
-    };
+  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
   return (
     <div className="w-full h-full px-4 py-6 dark:bg-dark-custom">
       <div className="flex items-center justify-between w-full">
         <div className="flex gap-3 items-center">
           <span className="hidden sm:block">Show</span>
           <div className="flex items-center gap-3">
+            {loading ? (
+              <div className="w-fit flex items-center justify-center px-4 py-2 bg-[#E0E0E0] dark:bg-[#141432] rounded-md">
+                <Loader2 
+                  className="animate-spin text-purple-600 dark:text-purple-400"
+                  size={16}
+                />
+              </div>
+            ) : (
               <Select
                 value={
                   selectedAmount === filteredProductsForSearch.length
@@ -56,18 +73,22 @@ const TableHeader = () => {
                 onValueChange={handleSelectChange}
               >
                 <SelectTrigger className="w-fit bg-[#E0E0E0] dark:bg-[#141432] dark:border-none">
-                  <SelectValue placeholder={selectedLabel} className="text-sm sm:text-xs" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectItem value="10">10</SelectItem>
-                  <SelectItem value="20">20</SelectItem>
-                  <SelectItem value="30">30</SelectItem>
-                  <SelectItem value="40">40</SelectItem>
-                  <SelectItem value="show-all">Show All</SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
+                  <SelectValue
+                    placeholder={selectedLabel}
+                    className="text-sm sm:text-xs"
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem value="10">10</SelectItem>
+                    <SelectItem value="20">20</SelectItem>
+                    <SelectItem value="30">30</SelectItem>
+                    <SelectItem value="40">40</SelectItem>
+                    <SelectItem value="show-all">Show All</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            )}
             <span className="hidden sm:block">entries</span>
           </div>
           <div className="relative">

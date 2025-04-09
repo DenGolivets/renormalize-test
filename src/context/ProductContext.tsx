@@ -24,11 +24,14 @@ interface ProductContextType {
   setCurrentPage: Dispatch<SetStateAction<number>>;
   totalPages: number;
   removeProduct: (productId: number) => void;
+  loading: boolean
+  setLoading: Dispatch<SetStateAction<boolean>>;
 }
 
 const ProductContext = createContext<ProductContextType | undefined>(undefined);
 
 export const ProductProvider = ({ children }: { children: ReactNode }) => {
+  const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState<Product[]>(productData);
   const [selectedAmount, setSelectedAmount] = useState<number>(10);
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -63,7 +66,8 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
     searchQuery, setSearchQuery,
     filteredProductsForSearch,
     currentPage, setCurrentPage, totalPages,
-    removeProduct
+    removeProduct,
+    loading, setLoading
   };
 
   return (
